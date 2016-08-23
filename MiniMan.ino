@@ -15,14 +15,18 @@ int IR_PIN = 23;
 IRrecv irDetect(IR_PIN);
 decode_results irIn;
 
+
+
+
 int relayBankSize = 3;// but 4 is reserved for arms
 
 int lastCode = 0x0;
-int lastPress = 0;
+ulong lastPress = 0;
 bool HOLDING = false;
-int holdTimeout = 80;// amount of ms before we care about it being off or not. aka minum burst
+// This needs to be tuned for the IR system. 
+ulong holdTimeout = 120;// amount of ms before we care about it being off or not. aka minum burst
 int stateMap = 0x0000;
-  
+
 struct KEYMAP {
   int UP = 0xFF629D;
   int DOWN = 0xFFA857;
@@ -40,7 +44,7 @@ struct KEYMAP {
   int NINE = 0xFF5AA5;
   int STAR = 0xFF42BD;
   int ZERO =  0xFF4AB5;
-  int POUND = 0xFF52AD;    
+  int POUND = 0xFF52AD;
 };
 
 // RELAY CONFIG
@@ -99,71 +103,71 @@ void off (int address) {
 void decodeIR() {
   lastPress = millis();
   HOLDING = false;
-    
+
   if (irIn.value != 0xFFFFFFFF) {
     lastCode = irIn.value;
   }
- 
+
   switch(irIn.value) {
-    case 0xFF629D:  
+    case 0xFF629D:
       Serial.println("Up Arrow");
       on(3);
       break;
-    case 0xFF22DD:  
-      Serial.println("Left Arrow"); 
+    case 0xFF22DD:
+      Serial.println("Left Arrow");
       on(0);
       break;
-    case 0xFF02FD:  
+    case 0xFF02FD:
       Serial.println("OK");
-      on(1); 
-      break;
-    case 0xFFC23D:  
-      on(2);
-      Serial.println("Right Arrow"); 
-      break;
-    case 0xFFA857:  
-      Serial.println("Down Arrow"); 
-      off(3);
-      break;
-    case 0xFF6897:  
-      Serial.println("1");
-      on(0); 
-      break;
-    case 0xFF9867:  
-      Serial.println("2"); 
       on(1);
       break;
-    case 0xFFB04F:  
-      Serial.println("3"); 
+    case 0xFFC23D:
+      on(2);
+      Serial.println("Right Arrow");
+      break;
+    case 0xFFA857:
+      Serial.println("Down Arrow");
+      off(3);
+      break;
+    case 0xFF6897:
+      Serial.println("1");
+      on(0);
+      break;
+    case 0xFF9867:
+      Serial.println("2");
+      on(1);
+      break;
+    case 0xFFB04F:
+      Serial.println("3");
       on(2);
       break;
-    case 0xFF30CF:  
-      Serial.println("4"); 
+    case 0xFF30CF:
+      Serial.println("4");
       break;
-    case 0xFF18E7:  
-      Serial.println("5"); 
+    case 0xFF18E7:
+      Serial.println("5");
       break;
-    case 0xFF7A85:  
-      Serial.println("6"); 
+    case 0xFF7A85:
+      Serial.println("6");
       break;
-    case 0xFF10EF:  
-      Serial.println("7"); 
+    case 0xFF10EF:
+      Serial.println("7");
       break;
-    case 0xFF38C7:  
-      Serial.println("8"); 
+    case 0xFF38C7:
+      Serial.println("8");
       break;
-    case 0xFF5AA5:  
-      Serial.println("9"); 
+    case 0xFF5AA5:
+      Serial.println("9");
       break;
-    case 0xFF42BD:  
-      Serial.println("* -- ALL ON"); 
+    case 0xFF42BD:
+      Serial.println("* -- ALL ON");
       allOn();
       break;
-    case 0xFF4AB5:  
-      Serial.println("0"); 
+    case 0xFF4AB5:
+      Serial.println("0");
       break;
-    case 0xFF52AD:  
-      Serial.println("# -- ALL OFF"); 
+    case 0xFF52AD:
+      Serial.println("# -- ALL OFF");
       allOff();
       break;
     case 0xFFFFFFFF:
@@ -171,16 +175,16 @@ void decodeIR() {
       Serial.print("HOLDING LAST:");
       Serial.println(lastCode, HEX);
       break;
-    default: 
+    default:
      break;
   }
-  irDetect.resume(); 
+  irDetect.resume();
 }
 
 void closeAllSelenoids() {
   // Loop 0 - 2, omit 3 so arms stay up.
   for (int i = 0; i <= relayBankSize - 1; i++) {
-    if ((stateMap & i) == i 
+    if ((stateMap & i) == i
         && !HOLDING
        ) {
       off(i);
@@ -212,4 +216,3 @@ void loop() {
     }
   }
 }
-
