@@ -18,9 +18,9 @@ decode_results irIn;
 
 
 
-int relayBankSize = 3;// but 4 is reserved for arms
+uint relayBankSize = 3;// but 4 is reserved for arms
 
-int lastCode = 0x0;
+uint lastCode = 0x0;
 ulong lastPress = 0;
 bool HOLDING = false;
 // This needs to be tuned for the IR system. 
